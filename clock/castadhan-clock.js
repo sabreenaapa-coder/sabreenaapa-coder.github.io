@@ -924,6 +924,23 @@
     if (dayBtn) dayBtn.addEventListener("click", watchPrayerDay);
     const dial = document.querySelector(".cp-dial");
     if (dial) dial.addEventListener("pointerdown", () => { if (_dayRAF) cancelDaySweep(); });
+    // SITE: rest when unseen — while the dial is scrolled out of view, lift the
+    // body.cp-active flag so spin()'s per-frame work (hands, mandala, the
+    // per-pixel aurora) no-ops. The production render path is untouched: it
+    // already gates everything on that class. On re-entry, redraw immediately.
+    if (dial && "IntersectionObserver" in window) {
+      const vis = new IntersectionObserver(es => {
+        es.forEach(e => {
+          document.body.classList.toggle("cp-active", e.isIntersecting);
+          if (e.isIntersecting) {
+            const now = _clockNow();
+            drawF24(_lastTimes || window.currentPrayers || {}, _lastNext, _lastHist, now);
+            setHands24(now);
+          }
+        });
+      }, { rootMargin: "160px 0px" });
+      vis.observe(dial);
+    }
   }
   const _start = () => {
     boot();
