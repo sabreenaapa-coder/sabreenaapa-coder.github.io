@@ -36,4 +36,14 @@
   apply();
   setInterval(apply, 60000);
   document.addEventListener('castadhan:times', apply);
+
+  // On the clock page only: preload the CURRENT period's wedge scene so the
+  // dial's brightest wedge paints as early as possible (segment names match
+  // the production scene filenames).
+  if (document.querySelector('.cp-dial')) {
+    var seg = document.documentElement.getAttribute('data-tod') || 'midday';
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = 'static/scenes/' + seg + '.jpg';
+    document.head.appendChild(l);
+  }
 })();

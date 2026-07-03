@@ -904,6 +904,29 @@
   window.__castadhanWatchDay = watchPrayerDay;
   window.__castadhanRefresh = refreshData; // used by "Show my city" for an instant redraw
 
+  /* SITE: while the adhan sample plays, the aurora leans toward gold — the
+     clock witnessing the sound. Implemented by WRAPPING updateAurora (the
+     production function body is untouched); the palette is nudged after the
+     production computation, exactly as the demo modes swap palettes. */
+  let _adhanLean = false;
+  const _updateAuroraProd = updateAurora;
+  updateAurora = function (now) {
+    _updateAuroraProd(now);
+    if (_adhanLean) {
+      const GOLD = [[231, 200, 120], [212, 175, 55], [166, 124, 41], [120, 90, 32]];
+      _auPal = _auPal.map((c, i) => {
+        const g = GOLD[Math.min(i, GOLD.length - 1)];
+        return c.map((v, j) => v + (g[j] - v) * 0.55);
+      });
+      window._auPal = _auPal;
+    }
+  };
+  window.__castadhanAdhanLean = function (on) {
+    _adhanLean = !!on;
+    updateAurora(new Date);
+    if (_reduce) drawAurora(0);
+  };
+
   function boot() {
     buildMandala();
     initAurora();
